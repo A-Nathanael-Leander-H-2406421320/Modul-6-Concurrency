@@ -20,6 +20,10 @@ In this commit, I have implemented a simple Error 404 implementation. Now, if th
 
 The slow network connection simulation via `/sleep` is a great example to show us how necessary concurrency and multithreading is in web servers. As we can see, when a thread is sleeping, it blocks the entire server, preventing it from handling any other incoming requests. This means that if multiple clients try to access the server while one thread is sleeping, they will all be blocked until the sleeping thread finishes its task. This can lead to a poor user experience and can significantly degrade the performance of the server.
 
-## Commit 4 Reflection notes
+## Commit 5 Reflection notes
 
 In this commit, I have implemented a simple thread pool to handle incoming requests concurrently. A thread pool is a collection of pre-spawned threads ("worker threads") that can be reused to execute tasks. By using a thread pool, we can avoid the overhead of creating a new thread for each incoming request, which can improve the performance and scalability of our web server. With the thread pool in place, our server can now handle multiple requests simultaneously, even when one of the threads is sleeping. This allows us to provide a better user experience and ensures that our server remains responsive under heavy load.
+
+## Commit Bonus Reflection notes
+
+In this commit, I have made a `build` method for the `ThreadPool` struct that returns a `Result` type. This allows us to handle potential errors that may occur during the creation of the thread pool, such as if the specified number of threads is zero or if there is an issue with spawning threads. By using `unwrap_or_else`, we can provide a custom error message and gracefully exit the program if the thread pool cannot be created. This is an important improvement as it enhances the robustness and reliability of our application, ensuring that it can handle errors gracefully and provide useful feedback to the user.

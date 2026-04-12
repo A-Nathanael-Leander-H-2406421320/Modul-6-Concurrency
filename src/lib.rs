@@ -1,4 +1,6 @@
 use std::{
+    error::Error,
+    fmt,
     sync::{Arc, Mutex, mpsc},
     thread,
 };
@@ -29,6 +31,29 @@ impl ThreadPool {
         ThreadPool { workers, sender }
     }
 
+    /// Create a new ThreadPool.
+    ///
+    /// The size is the number of threads in the pool.
+    ///
+    /// ### Errors
+    ///
+    /// The `build` function will return a `PoolCreationError` if the size is zero.
+    pub fn build(size: usize) -> Result<ThreadPool, PoolCreationError> {
+        if size == 0 {
+            return Err(PoolCreationError);
+        }
+
+        let (sender, receiver) = mpsc::channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+
+        let mut workers = Vec::with_capacity(size);
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&receiver)));
+        }
+
+        Ok(ThreadPool { workers, sender })
+    }
+
     pub fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static,
@@ -56,3 +81,14 @@ impl Worker {
         Worker { id, thread }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct PoolCreationError;
+
+impl fmt::Display for PoolCreationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Thread pool size must be greater than zero.")
+    }
+}
+
+impl Error for PoolCreationError {}
